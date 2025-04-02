@@ -31,12 +31,13 @@ pub enum SecondaryColor {
 }
 
 impl IndexedEnum for SecondaryColor {
-  const CARDINALITY: usize = PrimaryColor::CARDINALITY + SecondaryColor::CARDINALITY;
+  const CARDINALITY: usize = 3;
 
   fn to_idx(self) -> usize {
     match self {
-      Self::PrimaryColor(color) => color.to_idx(),
-      Self::SecondaryColor(color) => PrimaryColor::CARDINALITY + color.to_idx(),
+      Self::Orange => 0,
+      Self::Purple => 1,
+      Self::Green => 2,
     }
   }
 }
