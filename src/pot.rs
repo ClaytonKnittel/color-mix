@@ -1,7 +1,7 @@
-use crate::color::Color;
+use crate::color::PrimaryColor;
 
 pub struct Pot {
-  colors: [Color; Self::POT_SIZE],
+  colors: [PrimaryColor; Self::POT_SIZE],
 }
 
 impl Pot {
@@ -10,6 +10,8 @@ impl Pot {
 
 impl Default for Pot {
   fn default() -> Self {
-    Self { colors: [Color::Yellow, Color::Yellow] }
+    Self {
+      colors: [PrimaryColor::Yellow, PrimaryColor::Yellow],
+    }
   }
 }

@@ -1,9 +1,6 @@
-pub struct Bank {
-  colors: ColorSet,
-}
+use crate::cube_set::PrimaryColorSet;
 
-impl Default for Bank {
-  fn default() -> Self {
-    Self { colors: ColorSet::new() }
-  }
+#[derive(Default)]
+pub struct Bank {
+  colors: PrimaryColorSet,
 }
