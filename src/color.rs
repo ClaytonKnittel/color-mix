@@ -17,17 +17,6 @@ impl PrimaryColor {
   }
 
   pub fn mix(self, other: Self) -> Color {
-    match (self, other) {
-      (Self::Red, Self::Red) => Color::Red,
-      (Self::Yellow, Self::Yellow) => Color::Yellow,
-      (Self::Blue, Self::Blue) => Color::Blue,
-      (Self::Red, Self::Yellow) | (Self::Yellow, Self::Red) => Color::Orange,
-      (Self::Red, Self::Blue) | (Self::Blue, Self::Red) => Color::Purple,
-      (Self::Yellow, Self::Blue) | (Self::Blue, Self::Yellow) => Color::Green,
-    }
-  }
-
-  pub fn mix2(self, other: Self) -> Color {
     const COLORS: [Color; 9] = [
       Color::Red,
       Color::Orange,
@@ -41,6 +30,18 @@ impl PrimaryColor {
     ];
 
     COLORS[self.to_idx() + other.to_idx() * Self::CARDINALITY]
+  }
+
+  #[cfg(test)]
+  pub fn testonly_mix(self, other: Self) -> Color {
+    match (self, other) {
+      (Self::Red, Self::Red) => Color::Red,
+      (Self::Yellow, Self::Yellow) => Color::Yellow,
+      (Self::Blue, Self::Blue) => Color::Blue,
+      (Self::Red, Self::Yellow) | (Self::Yellow, Self::Red) => Color::Orange,
+      (Self::Red, Self::Blue) | (Self::Blue, Self::Red) => Color::Purple,
+      (Self::Yellow, Self::Blue) | (Self::Blue, Self::Yellow) => Color::Green,
+    }
   }
 }
 
@@ -126,7 +127,7 @@ mod tests {
     for c1 in PrimaryColor::all_colors() {
       for c2 in PrimaryColor::all_colors() {
         assert_eq!(c1.mix(c2), c2.mix(c1));
-        assert_eq!(c1.mix(c2), c1.mix2(c2));
+        assert_eq!(c1.mix(c2), c1.testonly_mix(c2));
       }
     }
   }
