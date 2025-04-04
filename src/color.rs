@@ -2,6 +2,10 @@ pub trait IndexedEnum {
   const CARDINALITY: usize;
 
   fn to_idx(self) -> usize;
+
+  fn from_idx(idx: usize) -> Option<Self>
+  where
+    Self: Sized;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -55,6 +59,15 @@ impl IndexedEnum for PrimaryColor {
       Self::Blue => 2,
     }
   }
+
+  fn from_idx(idx: usize) -> Option<Self> {
+    match idx {
+      0 => Some(Self::Red),
+      1 => Some(Self::Yellow),
+      2 => Some(Self::Blue),
+      _ => None,
+    }
+  }
 }
 
 struct PrimaryColorIter {
@@ -96,6 +109,18 @@ impl IndexedEnum for Color {
       Self::Orange => 3,
       Self::Purple => 4,
       Self::Green => 5,
+    }
+  }
+
+  fn from_idx(idx: usize) -> Option<Self> {
+    match idx {
+      0 => Some(Self::Red),
+      1 => Some(Self::Yellow),
+      2 => Some(Self::Blue),
+      3 => Some(Self::Orange),
+      4 => Some(Self::Purple),
+      5 => Some(Self::Green),
+      _ => None,
     }
   }
 }
