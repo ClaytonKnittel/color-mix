@@ -8,13 +8,24 @@ pub struct Player {
 impl Player {
   pub const STARTING_HP: u32 = 10;
 
-  pub fn add_cube(&mut self, color: Color) -> ColorMixResult {
+  pub fn add_cube(&mut self, color: Color) {
     self.cubes.insert(color);
-    Ok(())
   }
 
   pub fn remove_cube(&mut self, color: Color) -> ColorMixResult {
     self.cubes.remove(color)
+  }
+
+  pub fn damage(&mut self) {
+    self.hp -= 1;
+  }
+
+  pub fn heal(&mut self) {
+    self.hp += 1;
+  }
+
+  pub fn is_dead(&self) -> bool {
+    self.hp == 0
   }
 }
 

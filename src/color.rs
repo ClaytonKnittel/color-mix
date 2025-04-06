@@ -122,6 +122,17 @@ impl Color {
       .enumerate()
       .map(|(idx, count)| (PrimaryColor::from_idx(idx).unwrap(), count))
   }
+
+  pub fn opposite(self) -> Self {
+    match self {
+      Self::Red => Self::Green,
+      Self::Yellow => Self::Purple,
+      Self::Blue => Self::Orange,
+      Self::Orange => Self::Blue,
+      Self::Purple => Self::Yellow,
+      Self::Green => Self::Red,
+    }
+  }
 }
 
 impl Display for Color {
