@@ -23,6 +23,10 @@ impl<C: IndexedEnum + Copy, const N: usize> ColorSet<C, N> {
     self.count[color.to_idx()] += 1;
   }
 
+  pub fn insert_n(&mut self, color: C, count: u32) {
+    self.count[color.to_idx()] += count;
+  }
+
   pub fn capacity(&self, color: C) -> u32 {
     self.count[color.to_idx()]
   }
@@ -40,6 +44,16 @@ impl<C: IndexedEnum + Copy, const N: usize> ColorSet<C, N> {
         ColorMixError::InvalidAction(format!("Player does not have color {color:?} remaining"))
           .into(),
       )
+    }
+  }
+
+  pub fn empty(&self) -> bool {
+    self.count.iter().all(|&count| count == 0)
+  }
+
+  pub fn clear(&mut self) {
+    for count in &mut self.count {
+      *count = 0;
     }
   }
 }

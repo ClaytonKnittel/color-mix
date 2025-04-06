@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::{error::Error, fmt::Display, str::FromStr};
 
 use crate::error::{ColorMixError, ColorMixResult};
 
@@ -85,6 +85,17 @@ impl IndexedEnum for PrimaryColor {
       1 => Some(Self::Yellow),
       2 => Some(Self::Blue),
       _ => None,
+    }
+  }
+}
+
+impl FromStr for PrimaryColor {
+  type Err = Box<dyn Error + Send + Sync>;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    match s.as_bytes() {
+      [c] => Self::from_byte(*c),
+      _ => Err(ColorMixError::ParseError(format!("Invalid color \"{s}\"")).into()),
     }
   }
 }

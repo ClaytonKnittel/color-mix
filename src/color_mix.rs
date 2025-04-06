@@ -11,7 +11,7 @@ use crate::{
 #[derive(Clone, Copy, Debug)]
 pub enum PlayCube {
   Red,
-  Yellow { color: PrimaryColor },
+  Yellow,
   Blue,
   Orange { double_color: Color },
   Purple { steal_color: Color },
@@ -34,7 +34,7 @@ impl PlayCube {
 #[derive(Clone, Copy, Debug)]
 pub enum Action {
   PlayCube(PlayCube),
-  FinishTurn,
+  FinishTurn(PrimaryColor),
 }
 
 impl FromStr for Action {
@@ -42,11 +42,9 @@ impl FromStr for Action {
 
   fn from_str(s: &str) -> ColorMixResult<Self> {
     match s.as_bytes() {
-      [b'f'] => Ok(Self::FinishTurn),
+      [b'f', pot_color] => Ok(Self::FinishTurn(PrimaryColor::from_byte(*pot_color)?)),
       [b'r'] => Ok(Self::PlayCube(PlayCube::Red)),
-      [b'y', color] => Ok(Self::PlayCube(PlayCube::Yellow {
-        color: PrimaryColor::from_byte(*color)?,
-      })),
+      [b'y'] => Ok(Self::PlayCube(PlayCube::Yellow)),
       [b'b'] => Ok(Self::PlayCube(PlayCube::Blue)),
       [b'o', double_color] => Ok(Self::PlayCube(PlayCube::Orange {
         double_color: Color::from_byte(*double_color)?,
@@ -77,7 +75,9 @@ impl ColorMix {
     };
 
     // Finish p2's turn so p1 starts by drawing a cube from the pot.
-    color_mix.do_action(Action::FinishTurn).unwrap();
+    color_mix
+      .do_action(Action::FinishTurn(PrimaryColor::Yellow))
+      .unwrap();
 
     color_mix
   }
@@ -108,15 +108,16 @@ impl ColorMix {
         let other_player = self.other_player_mut();
         other_player.damage();
       }
-      PlayCube::Yellow { color } => {
-        self.pot.rotate_color(color);
+      PlayCube::Yellow => {
+        self.draw_from_pot()?;
       }
       PlayCube::Blue => {
         let player = self.cur_player_mut();
-        player.heal();
+        player.heal()?;
       }
       PlayCube::Orange { double_color } => {
-        todo!();
+        let player = self.cur_player_mut();
+        player.double_cubes(double_color);
       }
       PlayCube::Purple { steal_color } => {
         let other_player = self.other_player_mut();
@@ -126,6 +127,7 @@ impl ColorMix {
       }
       PlayCube::Green => {
         self.pot.swap_inverted_state();
+        self.draw_from_pot()?;
       }
     }
     Ok(())
@@ -134,11 +136,15 @@ impl ColorMix {
   fn play_cube(&mut self, play_cube: PlayCube) -> ColorMixResult {
     let player = self.cur_player_mut();
     let color = play_cube.color();
-    player.remove_cube(color)?;
+    let add_to_bank = player.remove_cube(color)?;
 
-    self.trigger_action(play_cube)?;
+    self.trigger_action(play_cube).inspect_err(|_| {
+      self.cur_player_mut().add_cube(color);
+    })?;
 
-    self.bank.deposit(color);
+    if add_to_bank {
+      self.bank.deposit(color);
+    }
     Ok(())
   }
 
@@ -153,7 +159,14 @@ impl ColorMix {
     Ok(())
   }
 
-  fn finish_turn(&mut self) -> ColorMixResult {
+  fn rotate_color(&mut self, color: PrimaryColor) -> ColorMixResult {
+    self.pot.rotate_color(color);
+    Ok(())
+  }
+
+  fn finish_turn(&mut self, pot_color: PrimaryColor) -> ColorMixResult {
+    self.cur_player_mut().clear_ephemeral();
+    self.rotate_color(pot_color)?;
     self.p1_turn = !self.p1_turn;
     self.draw_from_pot()
   }
@@ -161,7 +174,7 @@ impl ColorMix {
   pub fn do_action(&mut self, action: Action) -> ColorMixResult {
     match action {
       Action::PlayCube(play_cube) => self.play_cube(play_cube),
-      Action::FinishTurn => self.finish_turn(),
+      Action::FinishTurn(pot_color) => self.finish_turn(pot_color),
     }
   }
 

@@ -1,8 +1,8 @@
-use std::io::{BufRead, Lines, Write, stdin, stdout};
+use std::io::{stdin, stdout, BufRead, Lines, Write};
 
 use color_mix::color_mix::{Action, ColorMix};
 
-fn read_input_line<W: BufRead>(c: &ColorMix, input: &mut Lines<W>) -> Action {
+fn read_action<W: BufRead>(c: &ColorMix, input: &mut Lines<W>) -> Action {
   print!("{} action: ", if c.p1_turn() { "P1" } else { "P2" });
   stdout().flush().unwrap();
   let line = input.next().unwrap().unwrap();
@@ -10,19 +10,19 @@ fn read_input_line<W: BufRead>(c: &ColorMix, input: &mut Lines<W>) -> Action {
     Ok(action) => action,
     Err(err) => {
       println!("{err}");
-      read_input_line(c, input)
+      read_action(c, input)
     }
   }
 }
 
 fn main() {
-  let mut c = ColorMix::new(10);
+  let mut c = ColorMix::new(6);
 
   let stdin = stdin();
   let mut lines = stdin.lock().lines();
   while !c.finished() {
     println!("{c}");
-    let action = read_input_line(&c, &mut lines);
+    let action = read_action(&c, &mut lines);
     if let Err(err) = c.do_action(action) {
       println!("{err}");
     }
