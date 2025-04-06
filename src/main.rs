@@ -1,3 +1,5 @@
+use color_mix::color_mix::ColorMix;
+
 fn main() {
-  println!("Hello, world!");
+  let c = ColorMix::new(10);
 }

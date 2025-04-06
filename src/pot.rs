@@ -1,4 +1,4 @@
-use crate::color::PrimaryColor;
+use crate::color::{Color, PrimaryColor};
 
 pub struct Pot {
   colors: [PrimaryColor; Self::POT_SIZE],
@@ -6,6 +6,10 @@ pub struct Pot {
 
 impl Pot {
   pub const POT_SIZE: usize = 2;
+
+  pub fn color(&self) -> Color {
+    self.colors[0].mix(self.colors[1])
+  }
 }
 
 impl Default for Pot {

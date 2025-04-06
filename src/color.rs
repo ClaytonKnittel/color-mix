@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 pub trait IndexedEnum {
   const CARDINALITY: usize;
 
@@ -96,6 +98,47 @@ pub enum Color {
   Orange,
   Purple,
   Green,
+}
+
+impl Color {
+  pub fn decompose(self) -> &'static [PrimaryColor; 2] {
+    match self {
+      Self::Red => &[PrimaryColor::Red, PrimaryColor::Red],
+      Self::Yellow => &[PrimaryColor::Yellow, PrimaryColor::Yellow],
+      Self::Blue => &[PrimaryColor::Blue, PrimaryColor::Blue],
+      Self::Orange => &[PrimaryColor::Red, PrimaryColor::Yellow],
+      Self::Purple => &[PrimaryColor::Red, PrimaryColor::Blue],
+      Self::Green => &[PrimaryColor::Yellow, PrimaryColor::Blue],
+    }
+  }
+
+  pub fn decompose_iter(self) -> impl Iterator<Item = (PrimaryColor, u32)> {
+    let mut counts = [0, 0, 0];
+    for color in self.decompose() {
+      counts[color.to_idx()] += 1;
+    }
+    counts
+      .into_iter()
+      .enumerate()
+      .map(|(idx, count)| (PrimaryColor::from_idx(idx).unwrap(), count))
+  }
+}
+
+impl Display for Color {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(
+      f,
+      "{}",
+      match self {
+        Self::Red => 'R',
+        Self::Yellow => 'Y',
+        Self::Blue => 'B',
+        Self::Orange => 'O',
+        Self::Purple => 'P',
+        Self::Green => 'G',
+      }
+    )
+  }
 }
 
 impl IndexedEnum for Color {
