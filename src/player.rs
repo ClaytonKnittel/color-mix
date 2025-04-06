@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::{color::Color, cube_set::CubeSet, error::ColorMixResult};
 
 pub struct Player {
@@ -35,5 +37,11 @@ impl Default for Player {
       cubes: CubeSet::default(),
       hp: Self::STARTING_HP,
     }
+  }
+}
+
+impl Display for Player {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(f, "Hp: {} - cubes: {}", self.hp, self.cubes)
   }
 }

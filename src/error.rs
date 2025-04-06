@@ -7,12 +7,14 @@ use std::{
 #[derive(Debug)]
 pub enum ColorMixError {
   InvalidAction(String),
+  ParseError(String),
 }
 
 impl Display for ColorMixError {
   fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
     match self {
       ColorMixError::InvalidAction(msg) => write!(f, "Invalid action: {msg}"),
+      ColorMixError::ParseError(msg) => write!(f, "Parse error: {msg}"),
     }
   }
 }

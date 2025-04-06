@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::error::{ColorMixError, ColorMixResult};
+
 pub trait IndexedEnum {
   const CARDINALITY: usize;
 
@@ -49,6 +51,21 @@ impl PrimaryColor {
       (Self::Yellow, Self::Blue) | (Self::Blue, Self::Yellow) => Color::Green,
     }
   }
+
+  pub fn from_byte(byte: u8) -> ColorMixResult<Self> {
+    match byte {
+      b'r' => Ok(Self::Red),
+      b'y' => Ok(Self::Yellow),
+      b'b' => Ok(Self::Blue),
+      _ => Err(
+        ColorMixError::ParseError(format!(
+          "Unknown primary color char {}",
+          char::from_u32(byte as u32).unwrap_or('?')
+        ))
+        .into(),
+      ),
+    }
+  }
 }
 
 impl IndexedEnum for PrimaryColor {
@@ -69,6 +86,20 @@ impl IndexedEnum for PrimaryColor {
       2 => Some(Self::Blue),
       _ => None,
     }
+  }
+}
+
+impl Display for PrimaryColor {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(
+      f,
+      "{}",
+      match self {
+        Self::Red => 'R',
+        Self::Yellow => 'Y',
+        Self::Blue => 'B',
+      }
+    )
   }
 }
 
@@ -131,6 +162,24 @@ impl Color {
       Self::Orange => Self::Blue,
       Self::Purple => Self::Yellow,
       Self::Green => Self::Red,
+    }
+  }
+
+  pub fn from_byte(byte: u8) -> ColorMixResult<Self> {
+    match byte {
+      b'r' => Ok(Self::Red),
+      b'y' => Ok(Self::Yellow),
+      b'b' => Ok(Self::Blue),
+      b'o' => Ok(Self::Orange),
+      b'p' => Ok(Self::Purple),
+      b'g' => Ok(Self::Green),
+      _ => Err(
+        ColorMixError::ParseError(format!(
+          "Unknown color char {}",
+          char::from_u32(byte as u32).unwrap_or('?')
+        ))
+        .into(),
+      ),
     }
   }
 }

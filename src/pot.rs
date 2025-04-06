@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::color::{Color, PrimaryColor};
 
 pub struct Pot {
@@ -32,5 +34,18 @@ impl Default for Pot {
       colors: [PrimaryColor::Yellow, PrimaryColor::Yellow],
       inverted: false,
     }
+  }
+}
+
+impl Display for Pot {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    write!(
+      f,
+      "{}: [{}, {}]{}",
+      self.color(),
+      self.colors[0],
+      self.colors[1],
+      if self.inverted { " (inv)" } else { "" }
+    )
   }
 }

@@ -1,4 +1,8 @@
-use std::{fmt::Debug, marker::PhantomData, ops::Index};
+use std::{
+  fmt::{Debug, Display},
+  marker::PhantomData,
+  ops::Index,
+};
 
 use crate::{
   color::{Color, IndexedEnum, PrimaryColor},
@@ -51,6 +55,28 @@ impl<C: IndexedEnum, const N: usize> Index<C> for ColorSet<C, N> {
 
   fn index(&self, index: C) -> &u32 {
     &self.count[index.to_idx()]
+  }
+}
+
+impl<C: IndexedEnum, const N: usize> Display for ColorSet<C, N>
+where
+  C: Display,
+{
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    let mut first = true;
+    for (idx, &count) in self.count.iter().enumerate() {
+      if count != 0 {
+        if !first {
+          write!(f, " ")?;
+        }
+        write!(f, "{}", C::from_idx(idx).unwrap())?;
+        if count > 1 {
+          write!(f, "({})", count)?;
+        }
+        first = false;
+      }
+    }
+    Ok(())
   }
 }
 

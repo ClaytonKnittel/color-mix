@@ -1,9 +1,9 @@
-use std::fmt::Display;
+use std::{error::Error, fmt::Display, str::FromStr};
 
 use crate::{
   bank::Bank,
   color::{Color, PrimaryColor},
-  error::ColorMixResult,
+  error::{ColorMixError, ColorMixResult},
   player::Player,
   pot::Pot,
 };
@@ -37,6 +37,29 @@ pub enum Action {
   FinishTurn,
 }
 
+impl FromStr for Action {
+  type Err = Box<dyn Error + Send + Sync>;
+
+  fn from_str(s: &str) -> ColorMixResult<Self> {
+    match s.as_bytes() {
+      [b'f'] => Ok(Self::FinishTurn),
+      [b'r'] => Ok(Self::PlayCube(PlayCube::Red)),
+      [b'y', color] => Ok(Self::PlayCube(PlayCube::Yellow {
+        color: PrimaryColor::from_byte(*color)?,
+      })),
+      [b'b'] => Ok(Self::PlayCube(PlayCube::Blue)),
+      [b'o', double_color] => Ok(Self::PlayCube(PlayCube::Orange {
+        double_color: Color::from_byte(*double_color)?,
+      })),
+      [b'p', steal_color] => Ok(Self::PlayCube(PlayCube::Purple {
+        steal_color: Color::from_byte(*steal_color)?,
+      })),
+      [b'g'] => Ok(Self::PlayCube(PlayCube::Green)),
+      _ => Err(ColorMixError::ParseError(format!("Unknown action \"{s}\"")).into()),
+    }
+  }
+}
+
 pub struct ColorMix {
   players: (Player, Player),
   pot: Pot,
@@ -46,12 +69,21 @@ pub struct ColorMix {
 
 impl ColorMix {
   pub fn new(initial_count: u32) -> Self {
-    Self {
+    let mut color_mix = Self {
       players: (Player::default(), Player::default()),
       pot: Pot::default(),
       bank: Bank::new(initial_count),
-      p1_turn: true,
-    }
+      p1_turn: false,
+    };
+
+    // Finish p2's turn so p1 starts by drawing a cube from the pot.
+    color_mix.do_action(Action::FinishTurn).unwrap();
+
+    color_mix
+  }
+
+  pub fn p1_turn(&self) -> bool {
+    self.p1_turn
   }
 
   fn cur_player_mut(&mut self) -> &mut Player {
@@ -140,5 +172,16 @@ impl ColorMix {
   pub fn p1_wins(&self) -> bool {
     debug_assert!(self.finished());
     self.players.1.is_dead()
+  }
+}
+
+impl Display for ColorMix {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    writeln!(f, "P1: {}", self.players.0)?;
+    writeln!(f, "P2: {}", self.players.1)?;
+    writeln!(f, "Pot: {}", self.pot)?;
+    writeln!(f, "Bank: {}", self.bank)?;
+
+    Ok(())
   }
 }
