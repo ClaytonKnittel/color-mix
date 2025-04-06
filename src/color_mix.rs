@@ -66,6 +66,8 @@ pub struct ColorMix {
 }
 
 impl ColorMix {
+  const EMPTY_POT_DAMAGE: u32 = 2;
+
   pub fn new(initial_count: u32) -> Self {
     let mut color_mix = Self {
       players: (Player::default(), Player::default()),
@@ -154,6 +156,9 @@ impl ColorMix {
     if self.bank.maybe_withdraw(pot_color) {
       let player = self.cur_player_mut();
       player.add_cube(pot_color);
+    } else {
+      let player = self.cur_player_mut();
+      player.damage_n(Self::EMPTY_POT_DAMAGE);
     }
 
     Ok(())

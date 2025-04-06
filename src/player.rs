@@ -43,6 +43,10 @@ impl Player {
     self.hp -= 1;
   }
 
+  pub fn damage_n(&mut self, count: u32) {
+    self.hp = self.hp.saturating_sub(count);
+  }
+
   pub fn heal(&mut self) -> ColorMixResult {
     if self.hp < Self::STARTING_HP {
       self.hp += 1;
